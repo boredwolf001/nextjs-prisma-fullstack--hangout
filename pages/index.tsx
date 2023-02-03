@@ -3,6 +3,11 @@ import { getServerSession, Session } from 'next-auth'
 import { signOut, useSession } from 'next-auth/react'
 import { authOptions } from './api/auth/[...nextauth]'
 
+type Post = {
+  title: string
+  description: string
+}
+
 export async function getServerSideProps({
   req,
   res,
@@ -20,26 +25,33 @@ export async function getServerSideProps({
       },
     }
 
+  const postsResponse = await fetch('http://localhost:3000/api/posts')
+  const posts = await postsResponse.json()
+
   return {
-    props: {},
+    props: { posts },
   }
 }
 
-const Home: NextPage = () => {
+const Home = ({ posts }: { posts: Post[] }) => {
   const { data: session } = useSession()
 
   return (
-    <div className='mx-64 my-10'>
-      <h1 className='text-6xl font-bold mx-auto my-auto'>Hang-Out</h1>
-      <small className='text-2xl'>
-        Logged In as {session?.user?.email}
-      </small>{' '}
-      <br />
-      <button
-        className='btn-primary py-2 px-4 rounded-md font-medium hover: shadow-md mt-4'
-        onClick={() => signOut()}>
-        Sign Out
-      </button>
+    <div className='mx-auto w-fit'>
+      <h1 className='text-4xl font-bold my-10 text-ellipsis'>
+        Latest posts from your firends
+      </h1>
+      {posts.map(post => (
+        <div className=' mt-6 card w-auto bg-base-100 shadow-xl'>
+          <div className='card-body'>
+            <h2 className='card-title'>{post.title}</h2>
+            <p>{post.description}</p>
+            <div className='card-actions'>
+              <button className='btn'>♥</button>
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
