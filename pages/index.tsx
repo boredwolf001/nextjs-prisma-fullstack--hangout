@@ -1,12 +1,7 @@
 import type { NextApiRequest, NextApiResponse, NextPage } from 'next'
-import { getServerSession, Session } from 'next-auth'
-import { signOut, useSession } from 'next-auth/react'
-import { authOptions } from './api/auth/[...nextauth]'
-
-type Post = {
-  title: string
-  description: string
-}
+import { Post } from '@prisma/client'
+import NewPost from '../components/newpost'
+import PostCard from '../components/PostCard'
 
 export async function getServerSideProps({
   req,
@@ -15,42 +10,20 @@ export async function getServerSideProps({
   req: NextApiRequest
   res: NextApiResponse
 }) {
-  const session: Session | null = await getServerSession(req, res, authOptions)
-
-  if (!session?.user)
-    return {
-      redirect: {
-        destination: '/login',
-        permanent: false,
-      },
-    }
-
-  const postsResponse = await fetch('http://localhost:3000/api/posts')
-  const posts = await postsResponse.json()
-
+  const posts = await fetch(`${process.env.BASE_URL}/api/posts`).then(r =>
+    r.json()
+  )
   return {
     props: { posts },
   }
 }
 
 const Home = ({ posts }: { posts: Post[] }) => {
-  const { data: session } = useSession()
-
   return (
-    <div className='mx-auto w-fit'>
-      <h1 className='text-4xl font-bold my-10 text-ellipsis'>
-        Latest posts from your firends
-      </h1>
+    <div className='max-w-xl mt-10 mx-10'>
+      <NewPost className='mb-6' />
       {posts.map(post => (
-        <div className=' mt-6 card w-auto bg-base-100 shadow-xl'>
-          <div className='card-body'>
-            <h2 className='card-title'>{post.title}</h2>
-            <p>{post.description}</p>
-            <div className='card-actions'>
-              <button className='btn'>♥</button>
-            </div>
-          </div>
-        </div>
+        <PostCard post={post} />
       ))}
     </div>
   )

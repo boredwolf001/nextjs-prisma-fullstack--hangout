@@ -12,7 +12,16 @@ export default async function handler(
   if (req.method === 'GET') {
     try {
       const allPosts = await prisma.post.findMany()
-      res.status(200).json(allPosts)
+      const allPostsWithUser = await Promise.all(
+        allPosts.map(async post => {
+          const user = await prisma.user.findFirst({
+            where: { id: post.userId },
+          })
+          return { user, ...post }
+        })
+      )
+      console.log(allPostsWithUser)
+      res.status(200).json(allPostsWithUser)
     } catch (e) {
       res.status(500).json({ message: `Error occured: ${e}` })
     }
@@ -27,22 +36,25 @@ export default async function handler(
     // If user is not logged in
     if (!session?.user) return res.status(401).json({ message: 'Unauthorized' })
 
-    // check whether body is not empty
-    const body = JSON.parse(req.body)
-    if (!body.title || !body.description)
+    const postData = JSON.parse(req.body)
+
+    if (!postData.description || !postData.imageUrl)
       return res.status(400).json({ message: 'Fields cannot be empty' })
 
     try {
-      const createdPost = await prisma.post.create({
+      const newPost = await prisma.post.create({
         data: {
-          title: body.title,
-          description: body.description,
+          description: postData.description,
+          imageUrl: postData.imageUrl,
           userId: session.user.id,
         },
       })
-      res.status(201).json({ message: 'Post created', post: createdPost })
+      res.status(201).json(newPost)
     } catch (error) {
-      res.status(500).json({ message: `An error occured: ${error}` })
+      res
+        .status(500)
+        .json({ message: `An error occured while creating the post: ${error}` })
+      throw error
     }
   }
 }

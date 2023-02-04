@@ -37,7 +37,7 @@ const Home = ({ session }: { session: Session }) => {
     const getPosts = async () => {
       try {
         const postsResponse = await fetch(
-          `http://localhost:3000/api/posts/${query.uid}`
+          `${process.env.BASE_URL}/api/posts/${query.uid}`
         )
         const { posts, user } = await postsResponse.json()
         console.log(`Fetched posts and user >> ${posts} | ${user}`)
