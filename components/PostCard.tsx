@@ -1,4 +1,6 @@
-import React from 'react'
+import { Session } from 'next-auth'
+import React, { useState } from 'react'
+import { toast } from 'react-toastify'
 
 function formatDate(date: any) {
   const now: Date = new Date()
@@ -13,35 +15,59 @@ function formatDate(date: any) {
   return `${hours} hours ago`
 }
 
-const PostCard = ({ post }: { post: any }) => {
-  console.log(post)
+const PostCard = ({
+  post,
+  session,
+  deletePost,
+}: {
+  post: any
+  session: Session | null
+  deletePost: any
+}) => {
+  const [showDropdown, setShowDropdown] = useState(false)
+
   return (
-    <div className='bg-white p-4 rounded-lg shadow-md'>
-      <div className='flex'>
-        <img src={post.user.image} className='rounded-full h-12 w-12' />
-        <div className='ml-4'>
-          <h4 className='font-bold'>{post.user.name}</h4>
-          <p className='text-gray-600'>{formatDate(post.ceratedAt)}</p>
+    <div className='relative p-4 my-3 bg-white rounded-lg shadow-md'>
+      <div className='flex justify-between'>
+        <div className='mb-6 flex items-center'>
+          <img
+            src={post.user.image}
+            alt={post.user.name}
+            className='w-10 h-10 rounded-full'
+          />
+          <div className='ml-2'>
+            <p className='font-medium text-lg'>{post.user.name}</p>
+            <p className='text-gray-500 text-sm'>
+              {formatDate(post.ceratedAt)}
+            </p>
+          </div>
         </div>
+        {post.user.id === session?.user?.id && (
+          <button
+            className='py-1 px-4 rounded-md hover:bg-gray-200 text-gray-600 hover:text-gray-800 z-10'
+            onClick={() => setShowDropdown(!showDropdown)}>
+            &#8942;
+          </button>
+        )}
       </div>
-      <p className='mt-4'>{post.description}</p>
-      <div className='mt-4'>
-        <img src={post.imageUrl} className='rounded-lg' />
-      </div>
-      <div className='flex justify-between mt-4'>
-        <div className='flex items-center'>
-          <i className='fas fa-thumbs-up text-blue-500 mr-2'></i>
-          <p className='text-gray-600'>Like</p>
+      <img
+        src={post.imageUrl}
+        className='max-w-96 max-h-96 min-w-max object-cover rounded-md'
+        alt=''
+      />
+      <p className='mt-2'>{post.description}</p>
+      {showDropdown && (
+        <div className='absolute top-20 right-0 mt-2 py-2 bg-white rounded-lg shadow-md'>
+          <button className='block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-200'>
+            Edit
+          </button>
+          <button
+            className='block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-200'
+            onClick={() => deletePost(post.id)}>
+            Delete
+          </button>
         </div>
-        <div className='flex items-center'>
-          <i className='fas fa-comment text-blue-500 mr-2'></i>
-          <p className='text-gray-600'>Comment</p>
-        </div>
-        <div className='flex items-center'>
-          <i className='fas fa-share text-blue-500 mr-2'></i>
-          <p className='text-gray-600'>Share</p>
-        </div>
-      </div>
+      )}
     </div>
   )
 }

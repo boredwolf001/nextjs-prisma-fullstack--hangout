@@ -1,5 +1,5 @@
 import { Session } from 'next-auth'
-import { useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
 
 const Navbar = () => {
@@ -31,7 +31,8 @@ const Navbar = () => {
         ) : (
           <div className='flex items-center gap-6'>
             <Link href='/dashboard'>Dashboard</Link>
-            <Link href='/logout'>Log Out</Link>
+            <button onClick={() => signOut()}>Log Out</button>
+            <h1>{session.user.name}</h1>
           </div>
         )}
       </div>

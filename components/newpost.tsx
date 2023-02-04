@@ -7,8 +7,16 @@ import { toast } from 'react-toastify'
 import { useSession } from 'next-auth/react'
 import prisma from '../lib/prismadb'
 
-export default function NewPost({ className }: { className: string }) {
-  const [image, setImage] = useState()
+export default function NewPost({
+  className,
+  createPost,
+  loading,
+}: {
+  className: string
+  createPost: any
+  loading: boolean
+}) {
+  const [image, setImage] = useState(null)
   const [desc, setDesc] = useState('')
   const { data: session }: { data: Session | null } = useSession()
 
@@ -30,19 +38,8 @@ export default function NewPost({ className }: { className: string }) {
     )
     const uploadedImageData: any = await res.json()
 
-    try {
-      const res = await fetch(`/api/posts`, {
-        method: 'POST',
-        body: JSON.stringify({
-          imageUrl: uploadedImageData.secure_url,
-          description: desc,
-        }),
-      })
-    } catch (error) {
-      toast.error('Error occured while creating the post')
-      throw error
-    }
-    toast.success('Post created!')
+    createPost({ secure_url: uploadedImageData.secure_url, desc })
+    setDesc('')
   }
 
   return (
@@ -66,7 +63,8 @@ export default function NewPost({ className }: { className: string }) {
           </label>
           <button
             onClick={createNewPost}
-            className='bg-blue-500 p-2 rounded-lg text-white hover:bg-blue-600'>
+            className='bg-blue-500 p-2 rounded-lg text-white hover:bg-blue-600 disabled:cursor-progress disabled:bg-blue-400'
+            disabled={loading}>
             Post
           </button>
         </div>
