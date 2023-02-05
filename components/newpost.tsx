@@ -23,6 +23,7 @@ export default function NewPost({
 }) {
   const [image, setImage] = useState(null)
   const [desc, setDesc] = useState('')
+  const [imageUrlForPrev, setImageUrlForPrev] = useState('')
   const { data: session }: { data: Session | null } = useSession()
 
   useEffect(() => {
@@ -63,20 +64,29 @@ export default function NewPost({
           onChange={e => setDesc(e.target.value)}
           className='resize-none w-full p-2 border border-gray-400 rounded-lg'
           placeholder="What's on your mind?"></textarea>
+        {imageUrlForPrev && (
+          <img
+            src={imageUrlForPrev}
+            alt='Preview'
+            className='max-w-md object-cover m-6 rounded-md shadow-md bg-blue-50'
+          />
+        )}
         <div className='flex justify-between mt-4'>
-          <label className='bg-gray-300 p-2 rounded-lg text-gray-700 hover:bg-gray-400 cursor-pointer'>
+          <label className='bg-gray-300 py-2 px-4 rounded-lg text-gray-700 hover:bg-gray-400 cursor-pointer'>
             Add Photo
             <input
               onChange={(e: any) => {
+                setImageUrlForPrev(URL.createObjectURL(e.target.files[0]))
                 setImage(e.target.files[0])
               }}
               type='file'
               className='hidden'
             />
           </label>
+
           <button
             onClick={uploadImage}
-            className='bg-blue-500 p-2 rounded-lg text-white hover:bg-blue-600 disabled:cursor-progress disabled:bg-blue-400'
+            className='bg-blue-500 py-2 px-4 rounded-lg text-white hover:bg-blue-600 disabled:cursor-progress disabled:bg-blue-400'
             disabled={loading}>
             {isEditing ? 'Edit' : 'Post'}
           </button>

@@ -60,7 +60,7 @@ model Post {
   userId      String
   ceratedAt   DateTime  @default(now())
   comments    Comment[]
-  likes       Int
+  likes       Int       @default(0)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

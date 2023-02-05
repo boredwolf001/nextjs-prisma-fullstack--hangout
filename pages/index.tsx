@@ -92,10 +92,45 @@ const Home = ({ posts }: { posts: Post[] }) => {
       toast.error('Error occured while deleting the post')
       throw error
     }
+    setPostState(prevState => {
+      const particularPost: any = prevState.find(
+        post => post.id === currentEditingPost.id
+      )
+      const updatedPost: any = { ...particularPost, description, imageUrl }
+      const updatedPrevState = prevState.filter(
+        post => post.id !== currentEditingPost.id
+      )
+      return [updatedPost, ...updatedPrevState]
+    })
     toast.success(
       'Post edited successfully! Reload the page to effect the changes'
     )
     setLoading(false)
+  }
+
+  const likePost = async ({
+    id,
+    likeCount,
+  }: {
+    id: number
+    likeCount: number
+  }) => {
+    try {
+      setPostState((prevState: any) => {
+        const updatedState = prevState.map((post: any) =>
+          post.id == id ? { ...post, likes: likeCount + 1 } : post
+        )
+        console.log(updatedState)
+        return updatedState
+      })
+      await fetch(`/api/posts/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ likes: likeCount + 1 }),
+      })
+    } catch (error) {
+      toast.error('Error occured while liking the post')
+      throw error
+    }
   }
 
   return (
@@ -113,6 +148,7 @@ const Home = ({ posts }: { posts: Post[] }) => {
       ) : (
         postState.map(post => (
           <PostCard
+            likePost={likePost}
             setIsEditing={setIsEditing}
             setCurrentEditingPost={setCurrentEditingPost}
             post={post}

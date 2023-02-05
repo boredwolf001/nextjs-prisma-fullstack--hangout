@@ -48,14 +48,11 @@ export default async function handler(
     if (post?.userId !== session.user.id)
       return res.status(401).json({ message: 'No access' })
 
-    const { imageUrl, description } = JSON.parse(req.body)
-    if (!imageUrl || !description)
-      return res.status(400).json({ message: 'Fields cannot be empty' })
-
+    const body = JSON.parse(req.body)
     try {
       const updatedPost = await prisma.post.update({
         where: { id: post?.id },
-        data: { imageUrl: imageUrl, description },
+        data: { ...body },
       })
       res.status(200).json(updatedPost)
     } catch (error) {

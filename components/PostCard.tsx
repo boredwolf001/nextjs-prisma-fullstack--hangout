@@ -1,4 +1,5 @@
 import { Session } from 'next-auth'
+import Link from 'next/link'
 import React, { useState } from 'react'
 
 function formatDate(date: any) {
@@ -20,12 +21,14 @@ const PostCard = ({
   deletePost,
   setIsEditing,
   setCurrentEditingPost,
+  likePost,
 }: {
   post: any
-  session: Session | null
+  session: any | null
   deletePost: any
   setIsEditing: Function
   setCurrentEditingPost: Function
+  likePost: Function
 }) => {
   const [showDropdown, setShowDropdown] = useState(false)
 
@@ -47,7 +50,7 @@ const PostCard = ({
         </div>
         {post.user.id === session?.user?.id && (
           <button
-            className='py-1 px-4 rounded-md hover:bg-gray-200 text-gray-600 hover:text-gray-800 z-10'
+            className='px-4 py-0 mb-2 rounded-md hover:bg-gray-200 text-gray-600 hover:text-gray-800 z-10'
             onClick={() => setShowDropdown(!showDropdown)}>
             &#8942;
           </button>
@@ -59,6 +62,18 @@ const PostCard = ({
         alt=''
       />
       <p className='mt-2'>{post.description}</p>
+
+      <div className='text-gray-500 mt-6 gap-6 flex justify-center items-center'>
+        <span className='flex-1 text-center'>
+          <button
+            onClick={() => likePost({ id: post.id, likeCount: post.likes })}>
+            Like
+          </button>{' '}
+          | {post.likes}
+        </span>
+        <span className='flex-1 text-center'>Share</span>
+        <span className='flex-1 text-center'>Comment</span>
+      </div>
       {showDropdown && (
         <div className='absolute top-20 right-0 mt-2 py-2 bg-white rounded-lg shadow-md'>
           <button

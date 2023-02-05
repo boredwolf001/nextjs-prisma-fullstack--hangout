@@ -32,7 +32,11 @@ const Navbar = () => {
           <div className='flex items-center gap-6'>
             <Link href='/dashboard'>Dashboard</Link>
             <button onClick={() => signOut()}>Log Out</button>
-            <h1>{session.user.name}</h1>
+            <img
+              src={session?.user?.image!}
+              alt={session?.user?.name!}
+              className='w-10 h-10 rounded-full'
+            />
           </div>
         )}
       </div>
