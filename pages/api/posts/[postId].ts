@@ -40,4 +40,26 @@ export default async function handler(
       res.status(500).json({ message: 'Error occured while deleting the post' })
     }
   }
+
+  if (req.method === 'PUT') {
+    if (!session?.user) return res.status(401).json({ message: 'Unauthorized' })
+
+    const post = await prisma.post.findFirst({ where: { id: postId } })
+    if (post?.userId !== session.user.id)
+      return res.status(401).json({ message: 'No access' })
+
+    const { imageUrl, description } = JSON.parse(req.body)
+    if (!imageUrl || !description)
+      return res.status(400).json({ message: 'Fields cannot be empty' })
+
+    try {
+      const updatedPost = await prisma.post.update({
+        where: { id: post?.id },
+        data: { imageUrl: imageUrl, description },
+      })
+      res.status(200).json(updatedPost)
+    } catch (error) {
+      res.status(500).json({ message: 'Error occured while updating the post' })
+    }
+  }
 }

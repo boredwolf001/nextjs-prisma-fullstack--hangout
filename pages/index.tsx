@@ -25,6 +25,12 @@ export async function getServerSideProps({
 const Home = ({ posts }: { posts: Post[] }) => {
   const [postState, setPostState] = useState(posts)
   const [loading, setLoading] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [currentEditingPost, setCurrentEditingPost] = useState({
+    imageUrl: '',
+    desc: '',
+    id: '',
+  })
   const { data: session }: { data: Session | null } = useSession()
 
   const createPost = async ({
@@ -68,14 +74,51 @@ const Home = ({ posts }: { posts: Post[] }) => {
     toast.success('Post deleted')
   }
 
+  const editPost = async ({
+    description,
+    imageUrl,
+  }: {
+    description: string
+    imageUrl: string
+  }) => {
+    setLoading(true)
+    if (!imageUrl || !description) return toast.error('Fields cannot be empty')
+    try {
+      await fetch(`/api/posts/${currentEditingPost.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ description, imageUrl }),
+      }).then(r => r.json())
+    } catch (error) {
+      toast.error('Error occured while deleting the post')
+      throw error
+    }
+    toast.success(
+      'Post edited successfully! Reload the page to effect the changes'
+    )
+    setLoading(false)
+  }
+
   return (
     <div className='max-w-xl mt-10 mx-10'>
-      <NewPost loading={loading} createPost={createPost} className='mb-6' />
+      <NewPost
+        isEditing={isEditing}
+        editPost={editPost}
+        currentEditingPost={currentEditingPost}
+        loading={loading}
+        createPost={createPost}
+        className='mb-6'
+      />
       {postState.length === 0 ? (
         <h1 className='text-3xl text-center font-bold'>No posts</h1>
       ) : (
         postState.map(post => (
-          <PostCard post={post} session={session} deletePost={deletePost} />
+          <PostCard
+            setIsEditing={setIsEditing}
+            setCurrentEditingPost={setCurrentEditingPost}
+            post={post}
+            session={session}
+            deletePost={deletePost}
+          />
         ))
       )}
     </div>

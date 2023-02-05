@@ -2,27 +2,36 @@ import { getServerSession } from 'next-auth/next'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { authOptions } from '../pages/api/auth/[...nextauth]'
 import { Session } from 'next-auth'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import { useSession } from 'next-auth/react'
-import prisma from '../lib/prismadb'
 
 export default function NewPost({
   className,
   createPost,
   loading,
+  isEditing,
+  currentEditingPost,
+  editPost,
 }: {
   className: string
   createPost: any
   loading: boolean
+  isEditing: boolean
+  currentEditingPost: any
+  editPost: Function
 }) {
   const [image, setImage] = useState(null)
   const [desc, setDesc] = useState('')
   const { data: session }: { data: Session | null } = useSession()
 
-  const createNewPost = async () => {
+  useEffect(() => {
+    setDesc(currentEditingPost.description)
+  }, [isEditing])
+
+  const uploadImage = async () => {
     // check if user is not logged in
-    if (!session?.user) return toast.error('Log In to create a post')
+    if (!session?.user) return toast.error('Log In to create or edit a post')
 
     const formData = new FormData()
 
@@ -38,7 +47,11 @@ export default function NewPost({
     )
     const uploadedImageData: any = await res.json()
 
-    createPost({ secure_url: uploadedImageData.secure_url, desc })
+    if (isEditing) {
+      editPost({ description: desc, imageUrl: uploadedImageData.secure_url })
+    } else {
+      createPost({ secure_url: uploadedImageData.secure_url, desc })
+    }
     setDesc('')
   }
 
@@ -62,10 +75,10 @@ export default function NewPost({
             />
           </label>
           <button
-            onClick={createNewPost}
+            onClick={uploadImage}
             className='bg-blue-500 p-2 rounded-lg text-white hover:bg-blue-600 disabled:cursor-progress disabled:bg-blue-400'
             disabled={loading}>
-            Post
+            {isEditing ? 'Edit' : 'Post'}
           </button>
         </div>
       </div>

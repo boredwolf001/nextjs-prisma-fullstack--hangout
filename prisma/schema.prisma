@@ -42,6 +42,7 @@ model User {
   accounts      Account[]
   posts         Post[]
   sessions      Session[]
+  comments      Comment[]
 }
 
 model VerificationToken {
@@ -53,11 +54,24 @@ model VerificationToken {
 }
 
 model Post {
-  id          String @id @default(cuid())
+  id          String    @id @default(cuid())
   imageUrl    String
   description String
   userId      String
-  ceratedAt   DateTime @default(now())
+  ceratedAt   DateTime  @default(now())
+  comments    Comment[]
+  likes       Int
 
-  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  content   String
+  replies   String[]
+  userId    String
+  postId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
 }

@@ -1,6 +1,5 @@
 import { Session } from 'next-auth'
 import React, { useState } from 'react'
-import { toast } from 'react-toastify'
 
 function formatDate(date: any) {
   const now: Date = new Date()
@@ -19,10 +18,14 @@ const PostCard = ({
   post,
   session,
   deletePost,
+  setIsEditing,
+  setCurrentEditingPost,
 }: {
   post: any
   session: Session | null
   deletePost: any
+  setIsEditing: Function
+  setCurrentEditingPost: Function
 }) => {
   const [showDropdown, setShowDropdown] = useState(false)
 
@@ -52,13 +55,18 @@ const PostCard = ({
       </div>
       <img
         src={post.imageUrl}
-        className='max-w-96 max-h-96 min-w-max object-cover rounded-md'
+        className='max-w-96 max-h-96 object-cover rounded-md'
         alt=''
       />
       <p className='mt-2'>{post.description}</p>
       {showDropdown && (
         <div className='absolute top-20 right-0 mt-2 py-2 bg-white rounded-lg shadow-md'>
-          <button className='block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-200'>
+          <button
+            className='block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-200'
+            onClick={() => {
+              setIsEditing(true)
+              setCurrentEditingPost(post)
+            }}>
             Edit
           </button>
           <button
