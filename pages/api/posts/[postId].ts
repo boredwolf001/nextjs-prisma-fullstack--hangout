@@ -14,7 +14,10 @@ export default async function handler(
 
   if (req.method === 'GET') {
     try {
-      const post = await prisma.post.findFirst({ where: { id: postId } })
+      const post = await prisma.post.findFirst({
+        where: { id: postId },
+        include: { comments: { include: { user: true } }, user: true },
+      })
       if (!post)
         return res.status(404).json({ message: 'Post not found with this ID' })
 
